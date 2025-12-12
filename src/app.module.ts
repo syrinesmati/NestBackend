@@ -7,6 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
+import { SubtasksModule } from './subtasks/subtasks.module';
+import { LabelsModule } from './labels/labels.module';
+import { CommentsModule } from './comments/comments.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -21,6 +24,9 @@ import { validate } from './config/env.validation';
     UsersModule,
     ProjectsModule,
     TasksModule,
+    SubtasksModule,
+    LabelsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
