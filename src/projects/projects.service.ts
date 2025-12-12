@@ -1,12 +1,16 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AddMemberDto, UpdateMemberDto } from './dto/member.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(ownerId: string, dto: CreateProjectDto) {
     const project = await this.prisma.project.create({
@@ -78,9 +82,19 @@ export class ProjectsService {
 
   async addMember(userId: string, projectId: string, dto: AddMemberDto) {
     await this.assertOwner(userId, projectId);
-    return this.prisma.projectMember.create({
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('Project not found');
+
+    const member = await this.prisma.projectMember.create({
       data: { projectId, userId: dto.userId, role: dto.role },
     });
+
+    // Notify new member of project invite
+    await this.notifications
+      .notifyProjectInvite(dto.userId, project.name, projectId)
+      .catch(() => {});
+
+    return member;
   }
 
   async updateMember(userId: string, projectId: string, memberId: string, dto: UpdateMemberDto) {

@@ -1,18 +1,28 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(userId: string, dto: CreateCommentDto) {
-    const task = await this.prisma.task.findUnique({ where: { id: dto.taskId } });
+    const task = await this.prisma.task.findUnique({ where: { id: dto.taskId }, include: { owner: true, assignees: true } });
     if (!task) throw new NotFoundException('Task not found');
     await this.assertProjectMember(userId, task.projectId);
 
-    return this.prisma.comment.create({
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const comment = await this.prisma.comment.create({
       data: {
         content: dto.content,
         taskId: dto.taskId,
@@ -22,6 +32,23 @@ export class CommentsService {
         user: { select: { id: true, firstName: true, lastName: true, email: true } },
       },
     });
+
+    // Notify task owner and assignees
+    const commenterName = `${user.firstName} ${user.lastName}`.trim();
+    if (task.ownerId !== userId) {
+      await this.notifications
+        .notifyCommentAdded(task.ownerId, task.title, commenterName, dto.taskId)
+        .catch(() => {});
+    }
+    for (const assignee of task.assignees) {
+      if (assignee.id !== userId && assignee.id !== task.ownerId) {
+        await this.notifications
+          .notifyCommentAdded(assignee.id, task.title, commenterName, dto.taskId)
+          .catch(() => {});
+      }
+    }
+
+    return comment;
   }
 
   async listByTask(userId: string, taskId: string) {

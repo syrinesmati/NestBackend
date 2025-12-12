@@ -1,12 +1,16 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { FilterTaskDto } from './dto/filter-task.dto';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(userId: string, dto: CreateTaskDto) {
     // Verify user is member of project
@@ -144,13 +148,13 @@ export class TasksService {
   }
 
   async update(userId: string, id: string, dto: UpdateTaskDto) {
-    const task = await this.prisma.task.findUnique({ where: { id }, include: { project: true } });
+    const task = await this.prisma.task.findUnique({ where: { id }, include: { project: true, owner: true } });
     if (!task) throw new NotFoundException('Task not found');
 
     // Verify user is member of project
     await this.assertProjectMember(userId, task.projectId);
 
-    return this.prisma.task.update({
+    const updated = await this.prisma.task.update({
       where: { id },
       data: {
         title: dto.title,
@@ -172,13 +176,41 @@ export class TasksService {
         owner: {
           select: {
             id: true,
-            email: true,
             firstName: true,
             lastName: true,
           },
         },
       },
     });
+
+    // Notify if task marked complete
+    if (dto.status === 'DONE' && task.status !== 'DONE') {
+      const updaterName = `${updated.owner.firstName} ${updated.owner.lastName}`.trim();
+      // Notify task owner and assignees
+      await this.notifications
+        .notifyTaskCompletion(task.ownerId, task.title, updaterName, id)
+        .catch(() => {});
+      for (const assignee of updated.assignees) {
+        if (assignee.id !== task.ownerId) {
+          await this.notifications
+            .notifyTaskCompletion(assignee.id, task.title, updaterName, id)
+            .catch(() => {});
+        }
+      }
+    } else {
+      // Notify of general update
+      const updaterName = `${updated.owner.firstName} ${updated.owner.lastName}`.trim();
+      await this.notifications.notifyTaskUpdate(task.ownerId, task.title, updaterName, id).catch(() => {});
+      for (const assignee of updated.assignees) {
+        if (assignee.id !== task.ownerId) {
+          await this.notifications
+            .notifyTaskUpdate(assignee.id, task.title, updaterName, id)
+            .catch(() => {});
+        }
+      }
+    }
+
+    return updated;
   }
 
   async remove(userId: string, id: string) {
@@ -202,7 +234,7 @@ export class TasksService {
     // Verify assignee is also a member
     await this.assertProjectMember(assigneeId, task.projectId);
 
-    return this.prisma.task.update({
+    const result = await this.prisma.task.update({
       where: { id: taskId },
       data: {
         assignees: {
@@ -218,8 +250,22 @@ export class TasksService {
             lastName: true,
           },
         },
+        owner: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
+
+    // Notify assignee
+    const assignerName = `${result.owner.firstName} ${result.owner.lastName}`.trim();
+    await this.notifications.notifyTaskAssignment(assigneeId, task.title, assignerName, taskId).catch(() => {
+      // Silently fail notification if it errors
+    });
+
+    return result;
   }
 
   async unassignUser(userId: string, taskId: string, assigneeId: string) {
