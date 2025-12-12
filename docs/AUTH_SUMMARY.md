@@ -28,15 +28,18 @@ This document summarizes the authentication features and database configuration 
   - Decorator: `src/auth/decorators/roles.decorator.ts`
   - DTOs: `src/auth/dto/login.dto.ts`, `src/auth/dto/register.dto.ts`, `src/auth/dto/auth-response.dto.ts`
 - Features:
-  - Register: Creates `USER` with hashed password (bcrypt) and validation via `class-validator`.
-  - Login: Validates credentials; returns JWT with `sub`, `email`, `role`.
-  - JWT Strategy: Validates token; loads user and ensures `isActive`.
+  - Register: Creates `USER` with hashed password (bcrypt) and validation via `class-validator`. Sets secure HTTP-only cookie.
+  - Login: Validates credentials; returns JWT with `sub`, `email`, `role`. Sets secure HTTP-only cookie.
+  - Logout: Clears the authentication cookie.
+  - JWT Strategy: Validates token from cookie (primary) or `Authorization` header (fallback); loads user and ensures `isActive`.
   - Guards: `JwtAuthGuard` for authentication; `RoleGuard` for role-based access using `@Roles(UserRole.ADMIN)`.
+  - Cookie Security: HTTP-only (prevents XSS), secure in production (HTTPS only), SameSite: Strict (prevents CSRF), 7-day expiration.
   - Endpoints:
-    - `POST /auth/register`
-    - `POST /auth/login`
-    - `GET /auth/me` (JWT required)
-    - `GET /auth/admin-only` (JWT + ADMIN role required)
+    - `POST /auth/register` → Returns token, sets secure cookie
+    - `POST /auth/login` → Returns token, sets secure cookie
+    - `POST /auth/logout` → Clears cookie
+    - `GET /auth/me` (JWT required, cookie or bearer token)
+    - `GET /auth/admin-only` (JWT + ADMIN role required, cookie or bearer token)
 
 ## Server Setup
 - File: `src/main.ts`
@@ -69,6 +72,8 @@ Content-Type: application/json
   "lastName": "Doe"
 }
 ```
+Response includes `accessToken` AND sets secure `accessToken` cookie automatically.
+
 - Login (seeded admin):
 ```
 POST http://localhost:3000/auth/login
@@ -78,19 +83,31 @@ Content-Type: application/json
   "password": "Password123!"
 }
 ```
-- Me:
+Response includes `accessToken` AND sets secure `accessToken` cookie automatically.
+
+- Me (cookie stored, no header needed):
 ```
 GET http://localhost:3000/auth/me
-Authorization: Bearer <accessToken>
 ```
-- Admin-only:
+Cookie is sent automatically. Alternatively, pass header:
 ```
-GET http://localhost:3000/auth/admin-only
-Authorization: Bearer <accessToken>
+GET http://localhost:3000/auth/me
+Authorization: Bearer <your-access-token>
 ```
 
+- Admin-only (cookie stored):
+```
+GET http://localhost:3000/auth/admin-only
+```
+
+- Logout (clear cookie):
+```
+POST http://localhost:3000/auth/logout
+```
+Clears the `accessToken` cookie. Subsequent requests without the token will be rejected.
+
 ## Next Steps (Optional Enhancements)
-- Refresh token flow + logout
+- Refresh token flow (separate refresh token for longer sessions)
 - Password reset + email verification
 - Rate limiting for `/auth/login`
 - CORS + helmet hardening
