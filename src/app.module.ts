@@ -12,6 +12,7 @@ import { LabelsModule } from './labels/labels.module';
 import { CommentsModule } from './comments/comments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ActivityModule } from './activity/activity.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -31,6 +32,7 @@ import { validate } from './config/env.validation';
     CommentsModule,
     NotificationsModule,
     ActivityModule,
+    AttachmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
