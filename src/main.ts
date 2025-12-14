@@ -13,11 +13,13 @@ async function bootstrap() {
   // Security middleware
   app.use(helmet());
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || [
-      'http://localhost:4200',
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ],
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',')
+      : [
+          'http://localhost:4200',
+          'http://localhost:3000',
+          'http://localhost:3001',
+        ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
