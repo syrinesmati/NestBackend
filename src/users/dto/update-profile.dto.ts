@@ -12,11 +12,15 @@ export class UpdateProfileDto {
   @IsOptional()
   lastName?: string;
 
-  @ApiProperty({ example: 'https://cdn.example.com/avatar.png', required: false })
+  @ApiProperty({ 
+    example: 'https://cdn.example.com/avatar.png', 
+    description: 'Avatar URL or base64 data URL',
+    required: false 
+  })
   @IsString()
   @IsOptional()
-  @Matches(/^$|^https?:\/\/.+$/, {
-    message: 'avatar must be a valid URL or empty',
+  @Matches(/^$|^https?:\/\/.+$|^data:image\/(png|jpeg|jpg|gif);base64,/, {
+    message: 'avatar must be a valid URL, data URL, or empty',
   })
   avatar?: string;
 }
