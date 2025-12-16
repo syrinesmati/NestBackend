@@ -96,7 +96,23 @@ export class ProjectsService {
 
   async listMembers(userId: string, projectId: string) {
     await this.assertMember(userId, projectId);
-    return this.prisma.projectMember.findMany({ where: { projectId } });
+    return this.prisma.projectMember.findMany({
+      where: { projectId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
   }
 
   async addMember(userId: string, projectId: string, dto: AddMemberDto) {
