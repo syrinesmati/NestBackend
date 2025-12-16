@@ -135,10 +135,10 @@ export class ProjectsController {
     );
   }
 
-  @Get(':projectId/assignable-users')
-  @ApiOperation({ summary: 'List users assignable to this project (admin or owner)' })
+  @Get('assignable-users')
+  @ApiOperation({ summary: 'List all active assignable users (all authenticated users)' })
   @ApiResponse({ status: 200, description: 'Assignable users list' })
-  getAssignableUsers(@Param('projectId') projectId: string) {
-    return this.projectsService.getAssignableUsers(projectId);
+  getAssignableUsers() {
+    return this.projectsService.getAssignableUsers();
   }
 }
