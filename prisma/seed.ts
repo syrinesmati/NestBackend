@@ -118,6 +118,21 @@ async function main() {
     create: { name: 'Design', color: '#D946EF' },
   });
 
+  const defaultLabels = [
+    { name: 'Frontend', color: '#3b82f6' },
+    { name: 'Backend', color: '#10b981' },
+    { name: 'UI', color: '#8b5cf6' },
+  ];
+
+  for (const labelData of defaultLabels) {
+    await prisma.label.upsert({
+      where: { name: labelData.name },
+      update: {},
+      create: labelData,
+    });
+  }
+
+
   // Tasks
   const task1 = await prisma.task.create({
     data: {

@@ -17,7 +17,11 @@ export class AuthResponseDto {
       firstName: { type: 'string', example: 'John' },
       lastName: { type: 'string', example: 'Doe' },
       role: { enum: ['USER', 'ADMIN'], example: 'USER' },
-      avatar: { type: 'string', example: 'https://example.com/avatar.jpg', nullable: true },
+      avatar: {
+        type: 'string',
+        example: 'https://example.com/avatar.jpg',
+        nullable: true,
+      },
     },
   })
   user: {

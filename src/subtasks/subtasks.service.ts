@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSubtaskDto } from './dto/create-subtask.dto';
 import { UpdateSubtaskDto } from './dto/update-subtask.dto';
@@ -8,7 +12,9 @@ export class SubtasksService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateSubtaskDto) {
-    const task = await this.prisma.task.findUnique({ where: { id: dto.taskId } });
+    const task = await this.prisma.task.findUnique({
+      where: { id: dto.taskId },
+    });
     if (!task) throw new NotFoundException('Task not found');
     await this.assertProjectMember(userId, task.projectId);
 
@@ -27,11 +33,17 @@ export class SubtasksService {
     if (!task) throw new NotFoundException('Task not found');
     await this.assertProjectMember(userId, task.projectId);
 
-    return this.prisma.subtask.findMany({ where: { taskId }, orderBy: { position: 'asc' } });
+    return this.prisma.subtask.findMany({
+      where: { taskId },
+      orderBy: { position: 'asc' },
+    });
   }
 
   async update(userId: string, id: string, dto: UpdateSubtaskDto) {
-    const subtask = await this.prisma.subtask.findUnique({ where: { id }, include: { task: true } });
+    const subtask = await this.prisma.subtask.findUnique({
+      where: { id },
+      include: { task: true },
+    });
     if (!subtask) throw new NotFoundException('Subtask not found');
     await this.assertProjectMember(userId, subtask.task.projectId);
 
@@ -46,7 +58,10 @@ export class SubtasksService {
   }
 
   async remove(userId: string, id: string) {
-    const subtask = await this.prisma.subtask.findUnique({ where: { id }, include: { task: true } });
+    const subtask = await this.prisma.subtask.findUnique({
+      where: { id },
+      include: { task: true },
+    });
     if (!subtask) throw new NotFoundException('Subtask not found');
     await this.assertProjectMember(userId, subtask.task.projectId);
 
@@ -63,7 +78,10 @@ export class SubtasksService {
       include: { members: true },
     });
     if (!project) throw new NotFoundException('Project not found');
-    const isMember = project.ownerId === userId || project.members.some((m) => m.userId === userId);
-    if (!isMember) throw new ForbiddenException('Not authorized for this project');
+    const isMember =
+      project.ownerId === userId ||
+      project.members.some((m) => m.userId === userId);
+    if (!isMember)
+      throw new ForbiddenException('Not authorized for this project');
   }
 }

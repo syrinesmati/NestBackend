@@ -22,7 +22,9 @@ export class NotificationsService {
   }
 
   async markAsRead(userId: string, id: string) {
-    const notification = await this.prisma.notification.findUnique({ where: { id } });
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+    });
     if (!notification || notification.userId !== userId) {
       throw new NotFoundException('Notification not found');
     }
@@ -41,7 +43,9 @@ export class NotificationsService {
   }
 
   async deleteNotification(userId: string, id: string) {
-    const notification = await this.prisma.notification.findUnique({ where: { id } });
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+    });
     if (!notification || notification.userId !== userId) {
       throw new NotFoundException('Notification not found');
     }
@@ -68,7 +72,12 @@ export class NotificationsService {
     });
   }
 
-  async notifyTaskAssignment(userId: string, taskTitle: string, assignedBy: string, taskId: string) {
+  async notifyTaskAssignment(
+    userId: string,
+    taskTitle: string,
+    assignedBy: string,
+    taskId: string,
+  ) {
     return this.createNotification(
       userId,
       'TASK_ASSIGNED' as NotificationTypeDto,
@@ -78,7 +87,12 @@ export class NotificationsService {
     );
   }
 
-  async notifyTaskUpdate(userId: string, taskTitle: string, updatedBy: string, taskId: string) {
+  async notifyTaskUpdate(
+    userId: string,
+    taskTitle: string,
+    updatedBy: string,
+    taskId: string,
+  ) {
     return this.createNotification(
       userId,
       'TASK_UPDATED' as NotificationTypeDto,
@@ -88,7 +102,12 @@ export class NotificationsService {
     );
   }
 
-  async notifyTaskCompletion(userId: string, taskTitle: string, completedBy: string, taskId: string) {
+  async notifyTaskCompletion(
+    userId: string,
+    taskTitle: string,
+    completedBy: string,
+    taskId: string,
+  ) {
     return this.createNotification(
       userId,
       'TASK_COMPLETED' as NotificationTypeDto,
@@ -98,7 +117,12 @@ export class NotificationsService {
     );
   }
 
-  async notifyCommentAdded(userId: string, taskTitle: string, commentedBy: string, taskId: string) {
+  async notifyCommentAdded(
+    userId: string,
+    taskTitle: string,
+    commentedBy: string,
+    taskId: string,
+  ) {
     return this.createNotification(
       userId,
       'COMMENT_ADDED' as NotificationTypeDto,
@@ -108,7 +132,11 @@ export class NotificationsService {
     );
   }
 
-  async notifyProjectInvite(userId: string, projectName: string, projectId: string) {
+  async notifyProjectInvite(
+    userId: string,
+    projectName: string,
+    projectId: string,
+  ) {
     return this.createNotification(
       userId,
       'PROJECT_INVITE' as NotificationTypeDto,
@@ -118,7 +146,12 @@ export class NotificationsService {
     );
   }
 
-  async notifyMention(userId: string, taskTitle: string, mentionedBy: string, taskId: string) {
+  async notifyMention(
+    userId: string,
+    taskTitle: string,
+    mentionedBy: string,
+    taskId: string,
+  ) {
     return this.createNotification(
       userId,
       'MENTION' as NotificationTypeDto,

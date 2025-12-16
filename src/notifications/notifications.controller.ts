@@ -1,5 +1,19 @@
-import { Controller, Get, Patch, Delete, Param, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListNotificationsDto } from './dto';
@@ -15,7 +29,10 @@ export class NotificationsController {
   @ApiOperation({ summary: 'List user notifications' })
   @ApiResponse({ status: 200, description: 'Notifications list' })
   listNotifications(@Req() req: any, @Query() query: ListNotificationsDto) {
-    return this.notificationsService.listNotifications(req.user.userId, query.unreadOnly);
+    return this.notificationsService.listNotifications(
+      req.user.userId,
+      query.unreadOnly,
+    );
   }
 
   @Get('unread-count')

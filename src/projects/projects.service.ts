@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ActivityService } from '../activity/activity.service';
@@ -34,10 +38,7 @@ export class ProjectsService {
     // Projects owned or where user is member
     return this.prisma.project.findMany({
       where: {
-        OR: [
-          { ownerId: userId },
-          { members: { some: { userId } } },
-        ],
+        OR: [{ ownerId: userId }, { members: { some: { userId } } }],
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -49,15 +50,19 @@ export class ProjectsService {
       include: { members: true },
     });
     if (!project) throw new NotFoundException('Project not found');
-    const isMember = project.ownerId === userId || project.members.some((m) => m.userId === userId);
-    if (!isMember) throw new ForbiddenException('Not authorized to access this project');
+    const isMember =
+      project.ownerId === userId ||
+      project.members.some((m) => m.userId === userId);
+    if (!isMember)
+      throw new ForbiddenException('Not authorized to access this project');
     return project;
   }
 
   async update(userId: string, id: string, dto: UpdateProjectDto) {
     const project = await this.prisma.project.findUnique({ where: { id } });
     if (!project) throw new NotFoundException('Project not found');
-    if (project.ownerId !== userId) throw new ForbiddenException('Only owner can update project');
+    if (project.ownerId !== userId)
+      throw new ForbiddenException('Only owner can update project');
 
     const updated = await this.prisma.project.update({
       where: { id },
@@ -75,7 +80,9 @@ export class ProjectsService {
     if (dto.description) changes['description'] = dto.description;
     if (dto.color) changes['color'] = dto.color;
     if (dto.isArchived !== undefined) changes['isArchived'] = dto.isArchived;
-    await this.activity.recordProjectUpdated(userId, id, project.name, changes).catch(() => {});
+    await this.activity
+      .recordProjectUpdated(userId, id, project.name, changes)
+      .catch(() => {});
 
     return updated;
   }
@@ -94,7 +101,9 @@ export class ProjectsService {
 
   async addMember(userId: string, projectId: string, dto: AddMemberDto) {
     await this.assertOwner(userId, projectId);
-    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
     if (!project) throw new NotFoundException('Project not found');
 
     const member = await this.prisma.projectMember.create({
@@ -102,7 +111,9 @@ export class ProjectsService {
     });
 
     // Record activity
-    await this.activity.recordProjectMemberAdded(userId, projectId, dto.userId, dto.role).catch(() => {});
+    await this.activity
+      .recordProjectMemberAdded(userId, projectId, dto.userId, dto.role)
+      .catch(() => {});
 
     // Notify new member of project invite
     await this.notifications
@@ -112,11 +123,19 @@ export class ProjectsService {
     return member;
   }
 
-  async updateMember(userId: string, projectId: string, memberId: string, dto: UpdateMemberDto) {
+  async updateMember(
+    userId: string,
+    projectId: string,
+    memberId: string,
+    dto: UpdateMemberDto,
+  ) {
     await this.assertOwner(userId, projectId);
     // ensure member belongs to project
-    const member = await this.prisma.projectMember.findUnique({ where: { id: memberId } });
-    if (!member || member.projectId !== projectId) throw new NotFoundException('Member not found');
+    const member = await this.prisma.projectMember.findUnique({
+      where: { id: memberId },
+    });
+    if (!member || member.projectId !== projectId)
+      throw new NotFoundException('Member not found');
     return this.prisma.projectMember.update({
       where: { id: memberId },
       data: { role: dto.role },
@@ -125,8 +144,11 @@ export class ProjectsService {
 
   async removeMember(userId: string, projectId: string, memberId: string) {
     await this.assertOwner(userId, projectId);
-    const member = await this.prisma.projectMember.findUnique({ where: { id: memberId } });
-    if (!member || member.projectId !== projectId) throw new NotFoundException('Member not found');
+    const member = await this.prisma.projectMember.findUnique({
+      where: { id: memberId },
+    });
+    if (!member || member.projectId !== projectId)
+      throw new NotFoundException('Member not found');
     await this.prisma.projectMember.delete({ where: { id: memberId } });
     return { deleted: true };
   }
@@ -140,16 +162,22 @@ export class ProjectsService {
       include: { members: true },
     });
     if (!project) throw new NotFoundException('Project not found');
-    const isMember = project.ownerId === userId || project.members.some((m) => m.userId === userId);
-    if (!isMember) throw new ForbiddenException('Not authorized for this project');
+    const isMember =
+      project.ownerId === userId ||
+      project.members.some((m) => m.userId === userId);
+    if (!isMember)
+      throw new ForbiddenException('Not authorized for this project');
   }
 
   private async assertOwner(userId: string, projectId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (user?.role === 'ADMIN') return; // Admin bypass
 
-    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
     if (!project) throw new NotFoundException('Project not found');
-    if (project.ownerId !== userId) throw new ForbiddenException('Only owner permitted');
+    if (project.ownerId !== userId)
+      throw new ForbiddenException('Only owner permitted');
   }
 }

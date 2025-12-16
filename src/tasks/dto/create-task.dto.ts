@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsDateString, IsInt, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsDateString,
+  IsInt,
+  IsArray,
+} from 'class-validator';
 
 export enum TaskStatusDto {
   TODO = 'TODO',
@@ -20,7 +27,10 @@ export class CreateTaskDto {
   @IsString()
   title: string;
 
-  @ApiProperty({ example: 'Create mockups and implement responsive login UI', required: false })
+  @ApiProperty({
+    example: 'Create mockups and implement responsive login UI',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -49,9 +59,23 @@ export class CreateTaskDto {
   @IsString()
   projectId: string;
 
-  @ApiProperty({ example: ['user-uuid-1', 'user-uuid-2'], required: false, type: [String] })
+  @ApiProperty({
+    example: ['user-uuid-1', 'user-uuid-2'],
+    required: false,
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   assigneeIds?: string[];
+
+  @ApiProperty({
+    example: ['label-uuid-1', 'label-uuid-2'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  labelIds?: string[];
 }

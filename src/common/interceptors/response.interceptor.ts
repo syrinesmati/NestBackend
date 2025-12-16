@@ -32,7 +32,8 @@ export class ResponseInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data) => {
-        const statusCode = context.switchToHttp().getResponse().statusCode || HttpStatus.OK;
+        const statusCode =
+          context.switchToHttp().getResponse().statusCode || HttpStatus.OK;
 
         // If data already has statusCode, it's a custom response
         if (data && typeof data === 'object' && 'statusCode' in data) {
@@ -64,7 +65,7 @@ export class ResponseInterceptor implements NestInterceptor {
             message = msg || error.message;
             errorType = err || error.constructor.name;
           } else {
-            message = exceptionResponse as string;
+            message = exceptionResponse;
           }
         }
         // Handle Prisma validation errors

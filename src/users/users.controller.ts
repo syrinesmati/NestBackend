@@ -12,11 +12,20 @@ import {
   Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateProfileDto, ChangePasswordDto, UserProfileResponseDto } from './dto';
+import {
+  UpdateProfileDto,
+  ChangePasswordDto,
+  UserProfileResponseDto,
+} from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -64,7 +73,10 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Change user password' })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid current password or validation error' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid current password or validation error',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async changePassword(
@@ -92,7 +104,10 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async deleteUser(@Request() req: any, @Param('id') userId: string): Promise<{ message: string }> {
+  async deleteUser(
+    @Request() req: any,
+    @Param('id') userId: string,
+  ): Promise<{ message: string }> {
     return this.usersService.deleteUser(userId);
   }
 }

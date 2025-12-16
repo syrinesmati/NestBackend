@@ -1,5 +1,10 @@
 import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActivityService } from './activity.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ListActivityDto } from './dto';
@@ -19,7 +24,12 @@ export class ActivityController {
     @Param('projectId') projectId: string,
     @Query() query: ListActivityDto,
   ) {
-    return this.activityService.listProjectActivities(req.user.userId, projectId, query.page, query.limit);
+    return this.activityService.listProjectActivities(
+      req.user.userId,
+      projectId,
+      query.page,
+      query.limit,
+    );
   }
 
   @Get('task/:taskId')
@@ -30,6 +40,11 @@ export class ActivityController {
     @Param('taskId') taskId: string,
     @Query() query: ListActivityDto,
   ) {
-    return this.activityService.listTaskActivities(req.user.userId, taskId, query.page, query.limit);
+    return this.activityService.listTaskActivities(
+      req.user.userId,
+      taskId,
+      query.page,
+      query.limit,
+    );
   }
 }

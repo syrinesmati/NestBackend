@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CommentsService } from './comments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -26,7 +36,11 @@ export class CommentsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update comment (author only)' })
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateCommentDto) {
+  update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateCommentDto,
+  ) {
     return this.commentsService.update(req.user.userId, id, dto);
   }
 

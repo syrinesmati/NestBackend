@@ -1,7 +1,15 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateProfileDto, ChangePasswordDto, UserProfileResponseDto } from './dto';
+import {
+  UpdateProfileDto,
+  ChangePasswordDto,
+  UserProfileResponseDto,
+} from './dto';
 
 @Injectable()
 export class UsersService {

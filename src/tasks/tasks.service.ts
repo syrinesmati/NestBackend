@@ -39,6 +39,13 @@ export class TasksService {
               },
             }
           : {}),
+        ...(dto.labelIds && dto.labelIds.length > 0
+          ? {
+              labels: {
+                connect: dto.labelIds.map((id) => ({ id })),
+              },
+            }
+          : {}),
       },
       include: {
         assignees: {
@@ -47,6 +54,13 @@ export class TasksService {
             email: true,
             firstName: true,
             lastName: true,
+          },
+        },
+        labels: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
           },
         },
         owner: {
@@ -112,6 +126,13 @@ export class TasksService {
               lastName: true,
             },
           },
+          labels: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
           owner: {
             select: {
               id: true,
@@ -172,6 +193,13 @@ export class TasksService {
               lastName: true,
             },
           },
+          labels: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
           owner: {
             select: {
               id: true,
@@ -212,6 +240,13 @@ export class TasksService {
             email: true,
             firstName: true,
             lastName: true,
+          },
+        },
+        labels: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
           },
         },
         owner: {
@@ -286,6 +321,13 @@ export class TasksService {
             email: true,
             firstName: true,
             lastName: true,
+          },
+        },
+        labels: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
           },
         },
         owner: {
@@ -384,6 +426,7 @@ export class TasksService {
         },
       },
     });
+
     // Record activity
     await this.activity
       .recordTaskAssigned(
@@ -394,14 +437,13 @@ export class TasksService {
         task.title,
       )
       .catch(() => {});
+
     // Notify assignee
     const assignerName =
       `${result.owner.firstName} ${result.owner.lastName}`.trim();
     await this.notifications
       .notifyTaskAssignment(assigneeId, task.title, assignerName, taskId)
-      .catch(() => {
-        // Silently fail notification if it errors
-      });
+      .catch(() => {});
 
     return result;
   }

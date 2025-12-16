@@ -14,7 +14,10 @@ export class SearchService {
       return this.emptyResult(dto.page, dto.limit);
     }
 
-    const projectScope = this.resolveProjectScope(accessibleProjectIds, dto.projectId);
+    const projectScope = this.resolveProjectScope(
+      accessibleProjectIds,
+      dto.projectId,
+    );
     const page = dto.page ?? 1;
     const limit = dto.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -74,7 +77,10 @@ export class SearchService {
       return this.emptyResult(dto.page, dto.limit);
     }
 
-    const projectScope = this.resolveProjectScope(accessibleProjectIds, dto.projectId);
+    const projectScope = this.resolveProjectScope(
+      accessibleProjectIds,
+      dto.projectId,
+    );
     const page = dto.page ?? 1;
     const limit = dto.limit ?? 20;
     const skip = (page - 1) * limit;
@@ -107,8 +113,19 @@ export class SearchService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, email: true } },
-          task: { select: { id: true, title: true, status: true, priority: true, dueDate: true, projectId: true } },
+          user: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
+          task: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              priority: true,
+              dueDate: true,
+              projectId: true,
+            },
+          },
         },
       }),
       this.prisma.comment.count({ where }),
@@ -137,7 +154,9 @@ export class SearchService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (user?.role === 'ADMIN') {
       // Admin can see all projects
-      const allProjects = await this.prisma.project.findMany({ select: { id: true } });
+      const allProjects = await this.prisma.project.findMany({
+        select: { id: true },
+      });
       return allProjects.map((p) => p.id);
     }
 

@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLabelDto } from './dto/create-label.dto';
 import { UpdateLabelDto } from './dto/update-label.dto';
@@ -61,9 +65,15 @@ export class LabelsService {
   }
 
   private async assertProjectMember(userId: string, projectId: string) {
-    const project = await this.prisma.project.findUnique({ where: { id: projectId }, include: { members: true } });
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: { members: true },
+    });
     if (!project) throw new NotFoundException('Project not found');
-    const isMember = project.ownerId === userId || project.members.some((m) => m.userId === userId);
-    if (!isMember) throw new ForbiddenException('Not authorized for this project');
+    const isMember =
+      project.ownerId === userId ||
+      project.members.some((m) => m.userId === userId);
+    if (!isMember)
+      throw new ForbiddenException('Not authorized for this project');
   }
 }

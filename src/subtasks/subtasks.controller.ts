@@ -1,5 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SubtasksService } from './subtasks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateSubtaskDto } from './dto/create-subtask.dto';
@@ -27,7 +42,11 @@ export class SubtasksController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update subtask' })
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateSubtaskDto) {
+  update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateSubtaskDto,
+  ) {
     return this.subtasksService.update(req.user.userId, id, dto);
   }
 

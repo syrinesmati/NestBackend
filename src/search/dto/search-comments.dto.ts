@@ -1,7 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { TaskPriorityDto, TaskStatusDto } from '../../tasks/dto/create-task.dto';
+import {
+  TaskPriorityDto,
+  TaskStatusDto,
+} from '../../tasks/dto/create-task.dto';
 
 export class SearchCommentsDto {
   @ApiProperty({ required: false, example: 'edge cases' })

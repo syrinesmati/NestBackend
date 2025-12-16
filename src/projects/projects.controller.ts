@@ -1,5 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
@@ -39,7 +54,11 @@ export class ProjectsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update project (owner only)' })
   @ApiResponse({ status: 200, description: 'Project updated' })
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateProjectDto) {
+  update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateProjectDto,
+  ) {
     return this.projectsService.update(req.user.userId, id, dto);
   }
 
@@ -60,7 +79,11 @@ export class ProjectsController {
 
   @Post(':projectId/members')
   @ApiOperation({ summary: 'Add project member (owner only)' })
-  addMember(@Req() req: any, @Param('projectId') projectId: string, @Body() dto: AddMemberDto) {
+  addMember(
+    @Req() req: any,
+    @Param('projectId') projectId: string,
+    @Body() dto: AddMemberDto,
+  ) {
     return this.projectsService.addMember(req.user.userId, projectId, dto);
   }
 
@@ -72,12 +95,25 @@ export class ProjectsController {
     @Param('memberId') memberId: string,
     @Body() dto: UpdateMemberDto,
   ) {
-    return this.projectsService.updateMember(req.user.userId, projectId, memberId, dto);
+    return this.projectsService.updateMember(
+      req.user.userId,
+      projectId,
+      memberId,
+      dto,
+    );
   }
 
   @Delete(':projectId/members/:memberId')
   @ApiOperation({ summary: 'Remove project member (owner only)' })
-  removeMember(@Req() req: any, @Param('projectId') projectId: string, @Param('memberId') memberId: string) {
-    return this.projectsService.removeMember(req.user.userId, projectId, memberId);
+  removeMember(
+    @Req() req: any,
+    @Param('projectId') projectId: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.projectsService.removeMember(
+      req.user.userId,
+      projectId,
+      memberId,
+    );
   }
 }
