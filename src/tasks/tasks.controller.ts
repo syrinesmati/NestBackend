@@ -38,6 +38,14 @@ export class TasksController {
     return this.tasksService.create(req.user.userId, dto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all tasks in database (admin only)' })
+  @ApiResponse({ status: 200, description: 'All tasks' })
+  @ApiResponse({ status: 403, description: 'Forbidden: admin only' })
+  getAllTasks(@Req() req: any, @Query() filter: FilterTaskDto) {
+    return this.tasksService.findAllTasks(req.user.userId, filter);
+  }
+
   @Get('my-tasks')
   @ApiOperation({ summary: 'Get all tasks assigned to authenticated user' })
   @ApiResponse({ status: 200, description: 'List of assigned tasks' })

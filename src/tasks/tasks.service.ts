@@ -38,8 +38,7 @@ export class TasksService {
                 connect: dto.labelIds.map((id) => ({ id })),
               },
             }
-          : {}
-        ),
+          : {}),
         ...(dto.assigneeIds && dto.assigneeIds.length > 0
           ? {
               assignees: {
@@ -150,7 +149,82 @@ export class TasksService {
               lastName: true,
             },
           },
-      }
+        },
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return {
+      data: tasks,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findAllTasks(userId: string, filter: FilterTaskDto) {
+    // Check if user is admin
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.role !== 'ADMIN') {
+      throw new ForbiddenException('Only admins can view all tasks');
+    }
+
+    const { status, priority, labelId, search, page = 1, limit = 20 } = filter;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+    if (labelId) where.labels = { some: { id: labelId } };
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [tasks, total] = await Promise.all([
+      this.prisma.task.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
+        include: {
+          assignees: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          labels: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          project: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+        },
       }),
       this.prisma.task.count({ where }),
     ]);
@@ -282,7 +356,7 @@ export class TasksService {
   async update(userId: string, id: string, dto: UpdateTaskDto) {
     const task = await this.prisma.task.findUnique({
       where: { id },
-      include: { project: true, owner: true, assignees: true , labels: true},
+      include: { project: true, owner: true, assignees: true, labels: true },
     });
     if (!task) throw new NotFoundException('Task not found');
 
@@ -314,13 +388,14 @@ export class TasksService {
     } else if (role === 'VIEWER') {
       throw new ForbiddenException('Viewers cannot update tasks');
     }
-  const labelUpdate = dto.labelIds !== undefined 
-    ? {
-        labels: {
-          set: dto.labelIds.map((id) => ({ id })),
-        },
-      }
-    : {};
+    const labelUpdate =
+      dto.labelIds !== undefined
+        ? {
+            labels: {
+              set: dto.labelIds.map((id) => ({ id })),
+            },
+          }
+        : {};
 
     const updated = await this.prisma.task.update({
       where: { id },

@@ -176,6 +176,38 @@ async function main() {
     },
   });
 
+  // Archived projects
+  const projectNebula = await prisma.project.create({
+    data: {
+      id: 'project-nebula',
+      name: 'Project Nebula',
+      description: 'Historical analytics rollout',
+      color: '#64748B',
+      ownerId: dom.id,
+      isArchived: true,
+    },
+  });
+  const projectHelix = await prisma.project.create({
+    data: {
+      id: 'project-helix',
+      name: 'Project Helix',
+      description: 'Legacy migration archive',
+      color: '#14B8A6',
+      ownerId: ala.id,
+      isArchived: true,
+    },
+  });
+  const projectAtlas = await prisma.project.create({
+    data: {
+      id: 'project-atlas',
+      name: 'Project Atlas',
+      description: 'Archived global expansion plan',
+      color: '#F97316',
+      ownerId: amine.id,
+      isArchived: true,
+    },
+  });
+
   // Project members (assign editors/viewers, admin is not owner and has no tasks)
   const memberUpserts = [
     // Orion
@@ -265,6 +297,39 @@ async function main() {
     {
       projectId: projectAurora.id,
       userId: racem.id,
+      role: ProjectMemberRole.VIEWER,
+    },
+    // Archived: Nebula
+    {
+      projectId: projectNebula.id,
+      userId: dom.id,
+      role: ProjectMemberRole.OWNER,
+    },
+    {
+      projectId: projectNebula.id,
+      userId: yasmine.id,
+      role: ProjectMemberRole.EDITOR,
+    },
+    // Archived: Helix
+    {
+      projectId: projectHelix.id,
+      userId: ala.id,
+      role: ProjectMemberRole.OWNER,
+    },
+    {
+      projectId: projectHelix.id,
+      userId: racem.id,
+      role: ProjectMemberRole.VIEWER,
+    },
+    // Archived: Atlas
+    {
+      projectId: projectAtlas.id,
+      userId: amine.id,
+      role: ProjectMemberRole.OWNER,
+    },
+    {
+      projectId: projectAtlas.id,
+      userId: syrine.id,
       role: ProjectMemberRole.VIEWER,
     },
   ];

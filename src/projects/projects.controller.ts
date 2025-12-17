@@ -40,10 +40,13 @@ export class ProjectsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List my accessible projects' })
+  @ApiOperation({
+    summary:
+      'List projects (all projects if admin, otherwise accessible projects)',
+  })
   @ApiResponse({ status: 200, description: 'Projects list' })
   findAll(@Req() req: any) {
-    return this.projectsService.findAll(req.user.userId);
+    return this.projectsService.findAll(req.user.userId, req.user.role);
   }
 
   @Get(':id')

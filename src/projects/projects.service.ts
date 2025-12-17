@@ -34,7 +34,14 @@ export class ProjectsService {
     return project;
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string, role?: string) {
+    // Admins get all projects, regular users get only accessible projects
+    if (role === 'ADMIN') {
+      return this.prisma.project.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
     // Projects owned or where user is member
     return this.prisma.project.findMany({
       where: {
